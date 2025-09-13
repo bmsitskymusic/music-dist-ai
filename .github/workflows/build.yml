@@ -2,32 +2,33 @@ name: Build Frontend
 
 on:
   push:
-    branches: [ main ]   # chạy khi push vào nhánh main
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json   # 👈 chỉ định đúng file
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: npm install
 
       - name: Build project
+        working-directory: ./frontend
         run: npm run build
 
-      - name: Upload production build
+      - name: Upload production-ready build files
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
-          path: dist
+          path: frontend/dist
