@@ -1,7 +1,28 @@
-FROM node:18-alpine
+# ======================
+# Stage 1: Build app
+# ======================
+FROM node:18-slim AS build
+
 WORKDIR /app
+
 COPY package*.json ./
-RUN npm install --production
+RUN npm install
+
 COPY . .
 RUN npm run build
-CMD ["npm", "run", "preview"]
+
+
+# ======================
+# Stage 2: Serve with Nginx
+# ======================
+FROM nginx:alpine
+
+# Copy file build vào thư mục nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
